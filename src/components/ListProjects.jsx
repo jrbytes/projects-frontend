@@ -4,8 +4,9 @@ import {
   Row, Col, Button, Card, Alert
 } from 'react-bootstrap'
 import { FaPlusSquare, FaWindowClose } from 'react-icons/fa'
-import RegisterTech from './RegisterTech'
+import RegisterAndDeleteTechModal from './RegisterAndDeleteTechModal'
 import FormRegisterTech from './FormRegisterTech'
+import FormDeleteTech from './FormDeleteTech'
 
 function ListProjects() {
   const [projects, setProjects] = useState([])
@@ -14,6 +15,9 @@ function ListProjects() {
   const [techs, setTechs] = useState([])
   const [modalShow, setModalShow] = useState(false)
   const [idProjectTech, setIdProjectTech] = useState('')
+  const [titleModal, setTitleModal] = useState('')
+  const [registerOrDelete, setRegisterOrDelete] = useState('')
+  const [techForDelete, setTechForDelete] = useState({})
   
   useEffect(() => {
     async function loadProjects() {
@@ -24,6 +28,7 @@ function ListProjects() {
   }, [])
 
   async function addTech(data) {
+    console.log(data)
     try {
       const res = await api.post(`/projects/${idProjectTech}/techs`, data)
       console.log(res)
@@ -34,14 +39,32 @@ function ListProjects() {
     }
   }
 
+  async function removeTech(data) {
+    console.log(data)
+    try {
+      const res = await api.delete(`/projects/${idProjectTech}/techs`, {data: { name: data.name }})
+      console.log(res)
+      setModalShow(false)
+      handleViewTech(true, idProjectTech)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   async function handleAddTech(mostrarModal, id) {
+    setTitleModal('Adicionar uma tecnologia')
+    setRegisterOrDelete('register')
     setModalShow(mostrarModal)
     setIdProjectTech(id)
   }
 
-  async function handleDeleteTech(mostrarModal, id) {
+  async function handleDeleteTech(mostrarModal, id, tech) {
+    setTitleModal('Deseja realmente remover essa tecnologia?')
+    setRegisterOrDelete('delete')
+    setTechForDelete(tech)
     setModalShow(mostrarModal)
-    console.log(id)
+    setIdProjectTech(id)
+    console.log(id, tech)
   }
 
   async function handleViewTech(mostrar, id) {
@@ -88,11 +111,11 @@ function ListProjects() {
                     techs.map(tech => 
                       <Button 
                         variant='primary'
-                        style={{ margin: '0 10px' }}
+                        style={{ margin: '5px' }}
                         key={tech.id}>
                           {tech.name+' '}
                           <FaWindowClose
-                            onClick={() => handleDeleteTech(true, project.id)}
+                            onClick={() => handleDeleteTech(true, project.id, tech.name)}
                           />
                       </Button>
                     )
@@ -107,9 +130,18 @@ function ListProjects() {
                       <FaPlusSquare viewBox='0 30 448 512' />
                     </Button>
                   }
-                    <RegisterTech show={modalShow} onHide={() => setModalShow(false)}>
-                      <FormRegisterTech onSubmit={addTech} />
-                    </RegisterTech>
+                    <RegisterAndDeleteTechModal 
+                      show={modalShow}
+                      onHide={() => setModalShow(false)}
+                      title={titleModal}
+                      registerOrDelete={registerOrDelete}
+                      techForDelete={techForDelete}
+                    >
+                      { registerOrDelete === 'register' ?
+                        <FormRegisterTech onSubmit={addTech} /> :
+                        <FormDeleteTech onSubmit={removeTech} />
+                      }
+                    </RegisterAndDeleteTechModal>
                   {
                     alertTechs &&
                     <Alert variant='light' style={{margin: '0px'}}>

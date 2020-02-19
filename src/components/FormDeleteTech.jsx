@@ -1,14 +1,14 @@
 import React, { useState } from 'react'
 import { Form, Button } from 'react-bootstrap'
 
-function FormRegisterTech({ onSubmit }) {
-  const [name, setName] = useState('')
+function FormDeleteTech({ onSubmit, techForDelete }) {
+  const [setName] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
 
     await onSubmit({
-      name
+      name: techForDelete
     })
   }
 
@@ -18,15 +18,14 @@ function FormRegisterTech({ onSubmit }) {
         <Form.Control
           type='text'
           name='name'
-          value={name}
+          value={techForDelete}
+          disabled
           onChange={e => setName(e.target.value)}
-          placeholder='Digite uma tecnologia'
-          required
         />
       </Form.Group>
-      <Button variant='success' type='submit'>Salvar</Button>
+      <Button variant='danger' type='submit'>Deletar</Button>
     </Form>
   )
 }
 
-export default FormRegisterTech
+export default FormDeleteTech
