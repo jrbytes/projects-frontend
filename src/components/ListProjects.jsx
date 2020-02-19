@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import api from '../services/api'
 import { 
-  Row, Col, Button, Card, Alert, Form, Modal
+  Row, Col, Button, Card, Alert
 } from 'react-bootstrap'
-import { FaPlusSquare } from 'react-icons/fa'
+import { FaPlusSquare, FaWindowClose } from 'react-icons/fa'
+import RegisterTech from './RegisterTech'
+import FormRegisterTech from './FormRegisterTech'
 
 function ListProjects() {
   const [projects, setProjects] = useState([])
   const [viewTechs, setViewTechs] = useState({})
   const [alertTechs, setAlertTechs] = useState(false)
   const [techs, setTechs] = useState([])
-  // const [addTechForm, setAddTechForm] = useState(false)
   const [modalShow, setModalShow] = useState(false)
-  const [addTech, setAddTech] = useState({})
-
+  const [idProjectTech, setIdProjectTech] = useState('')
+  
   useEffect(() => {
     async function loadProjects() {
       const res = await api.get('/projects')
@@ -22,9 +23,25 @@ function ListProjects() {
     loadProjects()
   }, [])
 
+  async function addTech(data) {
+    try {
+      const res = await api.post(`/projects/${idProjectTech}/techs`, data)
+      console.log(res)
+      setModalShow(false)
+      handleViewTech(true, idProjectTech)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   async function handleAddTech(mostrarModal, id) {
     setModalShow(mostrarModal)
-    console.log(id, mostrarModal)
+    setIdProjectTech(id)
+  }
+
+  async function handleDeleteTech(mostrarModal, id) {
+    setModalShow(mostrarModal)
+    console.log(id)
   }
 
   async function handleViewTech(mostrar, id) {
@@ -72,7 +89,11 @@ function ListProjects() {
                       <Button 
                         variant='primary'
                         style={{ margin: '0 10px' }}
-                        key={tech.id}>{tech.name}
+                        key={tech.id}>
+                          {tech.name+' '}
+                          <FaWindowClose
+                            onClick={() => handleDeleteTech(true, project.id)}
+                          />
                       </Button>
                     )
                   }
@@ -81,29 +102,14 @@ function ListProjects() {
                     <Button
                       variant='success'
                       style={{ margin: '0 10px', fontWeight: 'bold' }}
-                    >
-                      <FaPlusSquare 
-                        viewBox='0 30 448 512'
-                        onClick={() => handleAddTech(true, project.id)} />
+                      onClick={() => handleAddTech(true, project.id)}
+                      >
+                      <FaPlusSquare viewBox='0 30 448 512' />
                     </Button>
                   }
-                  {
-                    <Modal show={modalShow} onHide={() => setModalShow(false)} size='lg' aria-labelledby='contained-modal-title-vcenter' centered>
-                      <Modal.Header closeButton>
-                        <Modal.Title id='contained-modal-title-vcenter'>Adicionar uma tecnologia</Modal.Title>
-                      </Modal.Header>
-                      <Modal.Body>
-                        <Form>
-                          <Form.Group>
-                            <Form.Control placeholder='Digite uma tecnologia' />
-                          </Form.Group>
-                        </Form>
-                      </Modal.Body>
-                      <Modal.Footer>
-                        <Button>Close</Button>
-                      </Modal.Footer>
-                    </Modal>
-                  }
+                    <RegisterTech show={modalShow} onHide={() => setModalShow(false)}>
+                      <FormRegisterTech onSubmit={addTech} />
+                    </RegisterTech>
                   {
                     alertTechs &&
                     <Alert variant='light' style={{margin: '0px'}}>
