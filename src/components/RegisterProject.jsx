@@ -1,14 +1,12 @@
 import React, { useState } from 'react'
 import api from '../services/api'
 import { Row, Col, Form, Button, Card, Alert } from 'react-bootstrap'
-import RegisterAndDelete from './RegisterAndDelete'
 
 function RegisterProject() {
   const [name, setName] = useState('')
   const [dirname, setDirname] = useState('')
   const [repository, setRepository] = useState('')
   const [projectSuccess, setProjectSuccess] = useState(false)
-  const [idProjectResponse, setIdProjectResponse] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -17,7 +15,6 @@ function RegisterProject() {
     try {
       const response = await api.post('/projects', data)
       console.log(response.data.id)
-      setIdProjectResponse(response.data.id)
       setProjectSuccess(true)
     } catch (error) {
       console.error(error)
@@ -81,11 +78,6 @@ function RegisterProject() {
             <Card.Title>{dirname}</Card.Title>
             <Card.Text><Card.Link href={repository}>{repository}</Card.Link></Card.Text>
           </Card.Body>
-
-          <RegisterAndDelete
-            projectId={idProjectResponse}
-          />
-
         </Card>
       </Col>
     </Row>
